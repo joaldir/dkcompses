@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+
+  appdb:
+    image: joaldir/vrx-reports-appdb:latest
+    restart: always
+
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: "vrx_db"
+      POSTGRES_USER: "vrx_user"
+      POSTGRES_PASSWORD: "securepassword123"
+#    labels:
+#      - "traefik.http.routers.metabasereports.entrypoints=web,websecure"
+#      - "traefik.http.routers.metabase.rule=Host(`db.example.com`)"
+#      - "traefik.http.routers.metabase.tls=true"
+#      - "traefik.http.routers.metabase.tls.certresolver=prod"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - vicarius-network
+
+  app:
+    image: joaldir/vrx-reports-app:latest
+    restart: always
+#    labels:
+#      - "traefik.enabled=false"
+    volumes:
+      - ./app/reports:/usr/src/app/reports
+      - ./app/logs:/var/log
+      - ./app/scripts:/usr/src/app/scripts
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - vicarius-network
+    environment:
+      API_KEY: "your_api_key_here"
+      DASHBOARD_ID: "your_dashboard_id_here"
+      POSTGRES_DB: "vrx_db"
+      POSTGRES_USER: "vrx_user"
+      POSTGRES_PASSWORD: "securepassword123"
+
+volumes:
+  postgres-data:
+
+networks:
+  vicarius-network:
+    attachable: true
